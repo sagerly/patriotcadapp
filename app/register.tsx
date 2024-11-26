@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { registerUser } from '../src/api';
+import { router } from 'expo-router';
 
 export default function RegisterScreen() {
   const [badgeId, setBadgeId] = useState('');
@@ -9,10 +11,38 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [department, setDepartment] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
-    // Add your registration logic here
-    console.log('Register:', badgeId, email, password, department);
+
+  const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+  
+    try {
+      setIsLoading(true); // Add this state if you haven't already
+      const response = await registerUser({
+        badgeId,
+        email,
+        password,
+        department
+      });
+      console.log('Registration successful:', response);
+      Alert.alert(
+        'Registration Successful',
+        'Your account has been created. Please login.',
+        [{ text: 'OK', onPress: () => router.replace('/') }]
+      );
+    } catch (error) {
+      console.error('Registration failed:', error);
+      Alert.alert(
+        'Registration Failed',
+        typeof error === 'string' ? error : 'An error occurred during registration'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

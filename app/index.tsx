@@ -1,15 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { loginUser } from '../src/api';
+import { router} from 'expo-router';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    console.log('Login:', email, password);
-  };
+
+const handleLogin = async () => {
+  try {
+    setIsLoading(true); // Add this state if you haven't already
+    const response = await loginUser(email, password);
+    console.log('Login successful:', response);
+    router.replace('/home');
+  } catch (error) {
+    console.error('Login failed:', error);
+    Alert.alert(
+      'Login Failed', 
+      typeof error === 'string' ? error : 'Please check your credentials and try again'
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -99,13 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     padding: 20,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    boxShadow: '0px 4px 5px rgba(0, 0, 0, 0.3)',
     elevation: 5,
   },
   title: {
